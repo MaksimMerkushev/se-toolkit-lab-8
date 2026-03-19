@@ -25,23 +25,7 @@ This page describes how to deploy the [LMS API](./lms-api.md#about-the-lms-api) 
 
 ### Clone the repository (REMOTE)
 
-1. [Connect to your VM](./vm-access.md#connect-to-the-vm-as-the-user-user-local).
-
-2. To navigate to the [home directory](./file-system.md#home-directory-),
-
-   [run in the `VS Code Terminal`](./vs-code.md#run-a-command-in-the-vs-code-terminal):
-
-   ```terminal
-   cd ~
-   ```
-
-3. To clone your [fork](./github.md#fork),
-
-   [run in the `VS Code Terminal`](./vs-code.md#run-a-command-in-the-vs-code-terminal):
-
-   ```terminal
-   git clone https://github.com/<your-github-username>/se-toolkit-lab-6 ~/se-toolkit-lab-6
-   ```
+1. [Clone the repository](./git-vscode.md#clone-the-repo-using-the-vs-code-terminal) with the URL `https://github.com/<your-github-username>/se-toolkit-lab-6` to `~/se-toolkit-lab-6` using the `VS Code Terminal`.
 
    Replace the placeholder [`<your-github-username>`](./github.md#your-github-username).
 
