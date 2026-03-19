@@ -77,6 +77,12 @@ We refer to your fork as `fork` and to the original repo as `upstream`.
 
    Replace the placeholder [`<your-github-username>`](../../wiki/github.md#your-github-username).
 
+   > <h3>Troubleshooting</h3>
+   >
+   > [**`git` asks for a password**](./github.md#git-asks-for-a-password)
+   >
+   > [**`fatal: destination path <directory-path> already exists and is not an empty directory.`**](./github.md#fatal-destination-path-directory-path-already-exists-and-is-not-an-empty-directory)
+
 2. [Open in `VS Code` the directory](../../wiki/vs-code.md#open-the-file-or-the-directory-using-code):
    `se-toolkit-lab-6`.
 
