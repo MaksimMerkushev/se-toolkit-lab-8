@@ -247,9 +247,7 @@ Complete these steps
       sudo docker stop $(docker ps -q) 2>/dev/null
       ```
 
-   2.
-
-   You should see removed [container IDs](#container-id).
+   2. [Type the password](./shell.md#type-the-password-for-the-user).
 
 2. To remove all stopped containers,
 
