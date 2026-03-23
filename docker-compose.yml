@@ -71,12 +71,21 @@ services:
       postgres:
         condition: service_healthy
 
+  client-web-react:
+    build:
+      context: client-web-react/
+      args:
+        REGISTRY_PREFIX: ${REGISTRY_PREFIX:-harbor.pg.innopolis.university/docker-hub-cache/}
+    volumes:
+      - client-web-react:/output
+
   caddy:
     image: ${REGISTRY_PREFIX:-harbor.pg.innopolis.university/docker-hub-cache/}caddy:2.11-alpine
     networks:
       - lms-network
     depends_on:
       - backend
+      - client-web-react
     environment:
       - CADDY_CONTAINER_PORT=${CADDY_CONTAINER_PORT:?'CADDY_CONTAINER_PORT is required'}
       - BACKEND_CONTAINER_PORT=${BACKEND_CONTAINER_PORT:?'BACKEND_CONTAINER_PORT is required'}
@@ -85,9 +94,12 @@ services:
       - ${LMS_API_HOST_ADDRESS:?'LMS_API_HOST_ADDRESS is required'}:${LMS_API_HOST_PORT:?'LMS_API_HOST_PORT is required'}:${CADDY_CONTAINER_PORT}
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - client-web-react:/srv/react:ro
+
 
 volumes:
   postgres_data:
+  client-web-react:
 
 networks:
   lms-network:
