@@ -150,6 +150,30 @@ The LMS MCP server is provided in `mcp/mcp_lms/`. It exposes the backend API as 
    Then make sure your main agent includes that server in its `mcpServers` list.
    If your onboard-generated config uses a slightly different layout, keep the same meaning: start `mcp_lms` as a stdio subprocess and attach it to the agent.
 
+   **Tip:** If you ask nanobot to add the MCP config for you, use a tight
+   prompt. Name the exact file to edit, the exact source file to inspect, the
+   required command and env vars, and what must stay unchanged.
+
+   <details>
+   <summary>Example prompt</summary>
+
+   ```text
+   Read nanobot/config.json and mcp/mcp_lms/server.py.
+   If tools.mcpServers.lms is missing, add it to nanobot/config.json.
+
+   Requirements:
+   - use command "python"
+   - use args ["-m", "mcp_lms"]
+   - set env.NANOBOT_LMS_BACKEND_URL to http://localhost:42002
+   - set env.NANOBOT_LMS_API_KEY to the LMS API key available in the current setup
+   - keep the existing Qwen provider settings unchanged
+   - do not modify any other file
+
+   After editing, summarize exactly what you changed.
+   ```
+
+   </details>
+
 3. Test with the agent:
 
    ```terminal
