@@ -13,7 +13,7 @@ from mcp.server.stdio import stdio_server
 from mcp.types import TextContent, Tool
 from pydantic import BaseModel, Field
 
-from lms_mcp.client import LMSClient
+from mcp_lms.client import LMSClient
 
 _base_url: str = ""
 

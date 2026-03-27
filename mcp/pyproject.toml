@@ -1,21 +1,26 @@
-[project]
-name = "lms-mcp"
-version = "1.0.0"
-description = "MCP server and shared client library for the LMS backend"
-requires-python = "==3.14.*"
-dependencies = [
-    "httpx>=0.28.0,<1.0.0",
-    "mcp>=1.26.0,<2.0.0",
-    "opentelemetry-distro[otlp]>=0.61b0",
-    "opentelemetry-exporter-otlp-proto-grpc>=1.40.0",
-    "opentelemetry-instrumentation-httpx>=0.61b0",
-    "opentelemetry-instrumentation-logging>=0.61b0",
-    "pydantic>=2.12.0,<3.0.0",
+[tool.uv.workspace]
+members = ["mcp-lms"]
+
+[dependency-groups]
+dev = [
+    "poethepoet>=0.40.0",
+    "pyright==1.1.408",
 ]
 
-[build-system]
-requires = ["setuptools>=75.0"]
-build-backend = "setuptools.build_meta"
+[tool.poe.tasks]
 
-[tool.setuptools.packages.find]
-include = ["lms_mcp*"]
+[tool.poe.tasks.check]
+help = "Run Python typechecks"
+sequence = ["pyright-check"]
+
+[tool.poe.tasks.pyright-check]
+help = "Run pyright on Python packages"
+cmd = "pyright"
+
+[tool.pyright]
+include = ["mcp-lms"]
+extraPaths = ["mcp-lms/src"]
+exclude = ["**/__pycache__", "**/.*", "**/node_modules", ".venv"]
+typeCheckingMode = "strict"
+reportUnknownMemberType = "none"
+reportMissingTypeStubs = "none"
