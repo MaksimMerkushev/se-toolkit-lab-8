@@ -3,9 +3,8 @@ members = [
   "backend",
   "qwen-code-api",
   "mcp/mcp-lms",
-
+  "nanobot",
   # Uncomment these later in the lab after you add the matching repos/packages.
-
   # "mcp/mcp-obs",
   # "nanobot-websocket-channel/nanobot-channel-protocol",
   # "nanobot-websocket-channel/mcp-webchat",
