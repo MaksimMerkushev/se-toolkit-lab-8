@@ -1,75 +1,111 @@
-# Lab 8 — The Agent is the Interface
+# se-toolkit-hackathon
 
-[Sync your fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork#syncing-a-fork-branch-from-the-command-line) regularly — the lab gets updated.
+se-toolkit-hackathon is a student progress dashboard that turns lab data into clear next actions.
 
-## Product brief
+## Screenshots
 
-> Your team has been running the LMS backend for weeks. Everyone queries data through the React dashboard or Swagger UI. Your team lead wants a new kind of interface: an AI agent that anyone can talk to in natural language. Nanobot is a lighter version of OpenClaw, and this kind of agent is becoming the new intelligent AI user interface. Instead of clicking through dashboards, users just ask questions — "which lab has the lowest pass rate?", "any errors in the last hour?" — and the agent figures out which API calls to make.
->
-> Set it up from scratch. Wire it into the system. Then extend it with observability tools so it can answer questions about system health too.
+The app includes a compact login screen, a lab progress hero, charts for scores and submissions, and an assistant panel that explains what to do next.
 
-> [!IMPORTANT]
-> Do the whole lab on your **VM**. You can work through a plain SSH shell or through `VS Code` Remote-SSH. When this guide says `localhost`, it means the VM itself or a forwarded port from that VM. Do not install or run `nanobot` on your main machine.
+- Dashboard overview
+- Assistant response view
 
-## What you will learn
+## Product context
 
-By the end of this lab, you should be able to say:
+### End users
 
-> 1. I can explain what makes an AI agent different from a regular client like a web app or a bot.
->    It is not just a self-hosted chat window: it has tools, skills, memory, and can act proactively.
-> 2. I set up nanobot from scratch — created the project, installed the framework, connected it to the Qwen API, wired it into Docker Compose, and talked to it.
-> 3. I saw what a bare agent does without tools (hallucinates) vs. with MCP tools (answers correctly) — and I understand why.
-> 4. I built MCP tools that let the agent query logs and traces, turning observability data into a conversational interface.
-> 5. I used the agent to investigate a failure, fix a planted bug, and configure it to report system health proactively.
+Students who need to understand their lab progress quickly.
 
-## Architecture
+### Problem
 
-By the end of the lab, the system looks like this.
+Lab data is spread across raw API responses, charts, and task lists. That makes it hard to see what is actually blocking progress.
 
-In Lab 7 you built one client around your own LLM loop. Here, the agent becomes a shared system layer that multiple clients can talk to — and that layer has reusable tools, memory, and scheduled actions.
+### Solution
 
-```
-[Browser]            [Telegram, optional]
-    \                       /
-     \                     /
-      +---- [Nanobot Agent] ---- [LLM]
-                 |
-         +-------+-------+
-         |               |
-   [LMS Tools]   [Observability Tools]
-         |               |
-   [LMS Backend]    [Logs / Traces]
-         |
-    [Postgres]
-```
+LabLens aggregates the existing LMS data into a single workspace that highlights weak tasks, group performance, and a recommended next step.
 
-### What you start with
+## Features
 
-- **LMS app**: the React dashboard, FastAPI backend, and PostgreSQL database.
-- **Platform services**: Caddy reverse-proxies all traffic, and the Qwen Code API gives your agent access to the LLM.
-- **Observability stack**: OpenTelemetry Collector, VictoriaLogs, and VictoriaTraces already collect system telemetry.
+### Implemented
 
-### What you add
+- Lab selector based on the current LMS catalog.
+- Completion rate, weak task, best group, and top learner summaries.
+- Score distribution, submission timeline, group comparison, and task pass-rate charts.
+- Assistant endpoint that answers questions about the selected lab.
+- Optional OpenAI-compatible LLM integration through environment variables.
 
-- **Nanobot agent**: a natural-language interface to the LMS that can reason, call tools, and answer questions.
-- **Web chat client**: a WebSocket channel plus a Flutter web UI at `/flutter`, protected by `NANOBOT_ACCESS_KEY`.
-- **New agent capabilities**: LMS MCP tools first, then observability MCP tools, then a scheduled health-check job.
+### Not yet implemented
 
-## Tasks
+- Per-user accounts and saved personal notes.
+- Push reminders for upcoming deadlines.
+- Mobile-specific layout.
 
-### Prerequisites
+## Usage
 
-1. Complete the [lab setup](./lab/setup/setup-simple.md#lab-setup)
+1. Start the backend, PostgreSQL, and frontend with Docker Compose or local services.
+2. Open the web app in a browser.
+3. Enter the LMS API key used in the previous labs. For the local demo, use `my-secret-api-key`.
+4. Choose a lab and ask the assistant what to focus on next.
 
-> **Note**: First time in this course? Do the [full setup](./lab/setup/setup-full.md#lab-setup) instead.
+## Enable AI (OpenRouter)
 
-### Required
+AskLabLens supports OpenRouter with `openai/gpt-4o-mini`.
 
-1. [Set Up the Agent](./lab/tasks/required/task-1.md) — install nanobot, configure Qwen API, add MCP tools, write skill prompt
-2. [Deploy and Connect a Web Client](./lab/tasks/required/task-2.md) — Dockerize nanobot, add WebSocket channel + Flutter chat UI
-3. [Give the Agent New Eyes](./lab/tasks/required/task-3.md) — explore observability data, write log/trace MCP tools
-4. [Diagnose a Failure and Make the Agent Proactive](./lab/tasks/required/task-4.md) — investigate a failure, schedule in-chat health checks, fix a planted bug
+1. Set your key in `/tmp/studyflow/.env`:
 
-### Optional
+	`OPENROUTER_API_KEY=<your-openrouter-key>`
 
-1. [Add a Telegram Bot Client](./lab/tasks/optional/task-1.md) — same agent, different interface
+2. Keep these values:
+
+	`OPENROUTER_BASE_URL=https://openrouter.ai/api/v1`
+
+	`OPENROUTER_MODEL=openai/gpt-4o-mini`
+
+3. Restart backend:
+
+	`set -a && source /tmp/studyflow/.env && set +a && /usr/local/bin/python3 /tmp/studyflow/backend/src/lms_backend/run.py`
+
+If the key is empty or invalid, AskLabLens automatically falls back to deterministic metric-based guidance.
+
+## Deployment
+
+### Target OS
+
+Ubuntu 24.04.
+
+### Required software
+
+- Docker
+- Docker Compose
+- A PostgreSQL instance for the backend data
+
+### Step-by-step
+
+1. Set the environment variables required by `docker-compose.yml`, including `LMS_API_KEY`, `POSTGRES_*`, and the gateway ports.
+2. Build and start the stack with `docker compose up --build`.
+3. Wait for PostgreSQL, the backend, and the frontend to become healthy.
+4. Open the gateway URL exposed by Caddy.
+5. Optionally configure `ASSISTANT_LLM_API_URL`, `ASSISTANT_LLM_API_KEY`, and `ASSISTANT_LLM_MODEL` to enable LLM-backed answers.
+
+### Recommended app names
+
+- `BACKEND_NAME=LabLens`
+- `BACKEND_NAME` is used by FastAPI and telemetry labels.
+
+## Backend API
+
+Key endpoints used by the client:
+
+- `GET /items/`
+- `GET /analytics/completion-rate?lab=lab-08`
+- `GET /analytics/pass-rates?lab=lab-08`
+- `GET /analytics/groups?lab=lab-08`
+- `GET /analytics/timeline?lab=lab-08`
+- `GET /analytics/top-learners?lab=lab-08&limit=3`
+- `POST /assistant/insights`
+
+## Stack
+
+- FastAPI backend
+- PostgreSQL database
+- React + Vite frontend
+- Optional OpenAI-compatible LLM for assistant summaries

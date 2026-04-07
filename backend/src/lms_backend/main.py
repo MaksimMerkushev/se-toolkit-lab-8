@@ -8,11 +8,15 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlmodel import SQLModel
+from sqlmodel.ext.asyncio.session import AsyncSession
 from starlette.middleware.base import RequestResponseEndpoint
 from starlette.responses import Response
 
 from lms_backend.auth import verify_api_key
-from lms_backend.routers import analytics, interactions, items, learners, pipeline
+from lms_backend.database import engine
+from lms_backend.routers import analytics, assistant, interactions, items, learners, pipeline
+from lms_backend.seed import seed_demo_data
 from lms_backend.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -24,13 +28,18 @@ async def lifespan(app: FastAPI):
     # (via OTEL_LOGS_EXPORTER=otlp). We only need to fix uvicorn.access, which has
     # propagate=False by default, so its HTTP access lines reach the OTel handler.
     logging.getLogger("uvicorn.access").propagate = True
+    async with engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.create_all)
+    if engine.url.get_backend_name().startswith("sqlite"):
+        async with AsyncSession(engine, expire_on_commit=False) as session:
+            await seed_demo_data(session)
     yield
 
 
 app = FastAPI(
     title=settings.app_name,
     debug=settings.debug,
-    description="A learning management service API.",
+    description="LabLens API for lab progress, analytics, and guidance.",
     version="0.1.0",
     lifespan=lifespan,
 )
@@ -126,5 +135,12 @@ app.include_router(
     analytics.router,
     prefix="/analytics",
     tags=["analytics"],
+    dependencies=[Depends(verify_api_key)],
+)
+
+app.include_router(
+    assistant.router,
+    prefix="/assistant",
+    tags=["assistant"],
     dependencies=[Depends(verify_api_key)],
 )

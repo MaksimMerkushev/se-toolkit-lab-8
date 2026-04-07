@@ -1,3 +1,3 @@
-from lms_backend.routers import analytics, interactions, items, learners, pipeline
+from lms_backend.routers import analytics, assistant, interactions, items, learners, pipeline
 
-__all__ = ["analytics", "interactions", "items", "learners", "pipeline"]
+__all__ = ["analytics", "assistant", "interactions", "items", "learners", "pipeline"]
