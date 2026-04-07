@@ -1,64 +1,19 @@
-import { useState, useEffect, useReducer, FormEvent } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import Dashboard from './Dashboard'
 import './App.css'
 
-const STORAGE_KEY = 'api_key'
-
-type Page = 'items' | 'dashboard'
-
-interface Item {
-  id: number
-  type: string
-  title: string
-  created_at: string
-}
-
-type FetchState =
-  | { status: 'idle' }
-  | { status: 'loading' }
-  | { status: 'success'; items: Item[] }
-  | { status: 'error'; message: string }
-
-type FetchAction =
-  | { type: 'fetch_start' }
-  | { type: 'fetch_success'; data: Item[] }
-  | { type: 'fetch_error'; message: string }
-
-function fetchReducer(_state: FetchState, action: FetchAction): FetchState {
-  switch (action.type) {
-    case 'fetch_start':
-      return { status: 'loading' }
-    case 'fetch_success':
-      return { status: 'success', items: action.data }
-    case 'fetch_error':
-      return { status: 'error', message: action.message }
-  }
-}
+const STORAGE_KEY = 'lablens_api_key'
 
 function App() {
   const [token, setToken] = useState(
     () => localStorage.getItem(STORAGE_KEY) ?? '',
   )
   const [draft, setDraft] = useState('')
-  const [page, setPage] = useState<Page>('items')
-  const [fetchState, dispatch] = useReducer(fetchReducer, { status: 'idle' })
 
   useEffect(() => {
-    if (!token) return
-
-    dispatch({ type: 'fetch_start' })
-
-    fetch('/items/', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        return res.json()
-      })
-      .then((data: Item[]) => dispatch({ type: 'fetch_success', data }))
-      .catch((err: Error) =>
-        dispatch({ type: 'fetch_error', message: err.message }),
-      )
+    if (token) {
+      localStorage.setItem(STORAGE_KEY, token)
+    }
   }, [token])
 
   function handleConnect(e: FormEvent) {
@@ -77,74 +32,39 @@ function App() {
 
   if (!token) {
     return (
-      <form className="token-form" onSubmit={handleConnect}>
-        <h1>LMS API Key</h1>
-        <p>Enter your LMS API key to connect.</p>
-        <input
-          type="password"
-          placeholder="Token"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-        />
-        <button type="submit">Connect</button>
-      </form>
+      <main className="token-shell">
+        <section className="token-card">
+          <div className="eyebrow">se-toolkit-hackathon</div>
+          <h1>Turn lab progress into clear next actions.</h1>
+          <p>
+            Connect with your LMS API key to see lab health, weak spots, and an
+            assistant that explains what to do next.
+          </p>
+          <form className="token-form" onSubmit={handleConnect}>
+            <label htmlFor="api-key">API key</label>
+            <input
+              id="api-key"
+              type="password"
+              placeholder="Paste your LMS API key"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+            />
+            <button type="submit">Open dashboard</button>
+          </form>
+          <p className="token-note">
+            The key is stored only in your browser. Use the same backend that you
+            already ran in the previous labs.
+          </p>
+          <p className="token-note">
+            Local demo key: <strong>my-secret-api-key</strong>
+          </p>
+        </section>
+      </main>
     )
   }
 
   return (
-    <div>
-      <header className="app-header">
-        <nav className="nav-links">
-          <button
-            className={page === 'items' ? 'nav-active' : ''}
-            onClick={() => setPage('items')}
-          >
-            Items
-          </button>
-          <button
-            className={page === 'dashboard' ? 'nav-active' : ''}
-            onClick={() => setPage('dashboard')}
-          >
-            Dashboard
-          </button>
-        </nav>
-        <button className="btn-disconnect" onClick={handleDisconnect}>
-          Disconnect
-        </button>
-      </header>
-
-      {page === 'dashboard' ? (
-        <Dashboard token={token} />
-      ) : (
-        <>
-          {fetchState.status === 'loading' && <p>Loading...</p>}
-          {fetchState.status === 'error' && <p>Error: {fetchState.message}</p>}
-
-          {fetchState.status === 'success' && (
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>ItemType</th>
-                  <th>Title</th>
-                  <th>Created at</th>
-                </tr>
-              </thead>
-              <tbody>
-                {fetchState.items.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.id}</td>
-                    <td>{item.type}</td>
-                    <td>{item.title}</td>
-                    <td>{item.created_at}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </>
-      )}
-    </div>
+    <Dashboard token={token} onDisconnect={handleDisconnect} />
   )
 }
 

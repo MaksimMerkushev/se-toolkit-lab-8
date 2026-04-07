@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 from typing import Any
 
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON
 from sqlmodel import Column, Field, SQLModel
 
 
@@ -33,7 +33,7 @@ class ItemRecord(SQLModel, table=True):
     title: str
     description: str = ""
     attributes: dict[str, Any] = Field(
-        default_factory=dict, sa_column=Column(JSONB, nullable=False)
+        default_factory=dict, sa_column=Column(JSON, nullable=False)
     )
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc).replace(tzinfo=None)

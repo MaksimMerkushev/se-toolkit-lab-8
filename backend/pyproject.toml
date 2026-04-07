@@ -1,7 +1,7 @@
 [project]
-name = "lms-backend"
+name = "se-toolkit-hackathon"
 version = "0.1.0"
-description = "LMS Backend API"
+description = "LabLens backend API"
 requires-python = "==3.14.*"
 dependencies = [
   "asyncpg>=0.30.0",
