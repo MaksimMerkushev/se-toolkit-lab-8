@@ -1,3 +1,7 @@
+# Local secrets and environment overrides
+.env
+.env.*
+!.env.docker.example
 .DS_Store
 .venv
 __pycache__/
@@ -21,3 +25,16 @@ tmp
 /nanobot/config.json
 /nanobot/config.resolved.json
 /nanobot/workspace/sessions/
+
+# Local runtime artifacts
+*.db
+*.out
+npm-debug.log
+.api_*
+.backend_*
+.be_*
+.fe_*
+.frontend_*
+.health.*
+.precheck
+.web_*
